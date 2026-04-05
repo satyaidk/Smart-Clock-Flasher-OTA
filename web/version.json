@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "firmware_url": "https://your-domain.com/clock/firmware.bin",
+  "release_notes": "Initial release",
+  "min_version": "1.0.0"
+}

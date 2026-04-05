@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Clock Flasher</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f11;
+      --card: #1a1a1f;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --muted: #888;
+      --accent: #7c6ff7;
+      --accent2: #4cc9a4;
+      --warn: #f5a623;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .logo {
+      width: 72px; height: 72px;
+      margin: 0 auto 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); font-size: 15px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* Flash button override */
+    esp-web-install-button {
+      display: block;
+      margin-top: 8px;
+    }
+    esp-web-install-button::part(button) {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity .15s;
+    }
+    esp-web-install-button::part(button):hover { opacity: .85; }
+
+    .steps { list-style: none; }
+    .steps li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .pin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .pin-table th, .pin-table td {
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .pin-table th { color: var(--muted); font-weight: 500; font-size: 12px; }
+    .pin-table td:last-child { color: var(--accent2); font-family: monospace; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(124,111,247,.15);
+      color: var(--accent);
+      margin-left: 6px;
+    }
+
+    .warn-box {
+      background: rgba(245,166,35,.08);
+      border: 1px solid rgba(245,166,35,.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--warn);
+      margin-bottom: 16px;
+    }
+
+    footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* Browser support check */
+    .no-serial-msg { display: none; color: var(--warn); font-size: 14px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🕐</div>
+  <h1>Smart Clock Flasher</h1>
+  <p class="subtitle">ESP32-C3 Super Mini + SSD1306 OLED &nbsp;<span class="badge">v1.0.0</span></p>
+</header>
+
+<!-- Flash card -->
+<div class="card">
+  <h2>Flash Firmware</h2>
+  <div class="warn-box" id="browser-warn" style="display:none">
+    ⚠ Your browser doesn't support Web Serial. Use Chrome or Edge (desktop).
+  </div>
+  <p style="font-size:14px;color:var(--muted);margin-bottom:16px">
+    Connect your ESP32-C3 Super Mini via USB, then click Flash.
+    The browser will handle the rest — no software needed.
+  </p>
+  <esp-web-install-button manifest="manifest.json">
+    <span slot="unsupported">
+      Web Serial not supported. Use Chrome or Edge.
+    </span>
+  </esp-web-install-button>
+</div>
+
+<!-- Wiring card -->
+<div class="card">
+  <h2>Wiring — ESP32-C3 Super Mini → SSD1306 OLED</h2>
+  <table class="pin-table">
+    <thead>
+      <tr><th>ESP32-C3 Pin</th><th>OLED Pin</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>3.3V</td><td>VCC</td><td>3.3 V power</td></tr>
+      <tr><td>GND</td><td>GND</td><td>Ground</td></tr>
+      <tr><td>GPIO20</td><td>SDA</td><td>I²C data</td></tr>
+      <tr><td>GPIO21</td><td>SCL</td><td>I²C clock</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:var(--muted);margin-top:12px">
+    GPIO9 also doubles as the BOOT button on the C3 Super Mini.
+    A short press cycles clock faces; hold 2 s to reset WiFi credentials.
+  </p>
+</div>
+
+<!-- Steps card -->
+<div class="card">
+  <h2>First Boot</h2>
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div>Flash the firmware using the button above.</div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div>
+        On first boot the clock creates a WiFi AP called
+        <strong>SmartClock-Setup</strong> (password: <code>clocksetup</code>).
+        Connect with your phone or laptop.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div>
+        A captive portal opens automatically at <code>192.168.4.1</code>.
+        Select your WiFi network and enter your timezone offset in seconds
+        (e.g. IST = <code>19800</code>, UTC = <code>0</code>, EST = <code>-18000</code>).
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div>
+        The clock connects, syncs time via NTP, and starts displaying.
+        Credentials are saved — it auto-connects on every reboot.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div>
+        Press the BOOT button to cycle between Digital, Analog, and Minimal
+        clock faces. Hold 2 s to reset WiFi.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<footer>
+  Firmware <a href="https://github.com/your-org/esp32c3-smart-clock" target="_blank">source on GitHub</a>
+  &nbsp;·&nbsp; Built with ESP Web Tools
+</footer>
+
+<script>
+  // Browser support check
+  if (!('serial' in navigator)) {
+    document.getElementById('browser-warn').style.display = 'block';
+  }
+</script>
+</body>
+</html>
